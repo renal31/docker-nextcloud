@@ -1,4 +1,4 @@
-version: '3'
+version: '2'
 
 services:
   db:
@@ -6,9 +6,10 @@ services:
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     restart: always
     volumes:
-      - db:/var/lib/mysql
+      - ${DB_HOST_MOUNT}:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
     environment:
-      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_ROOT_PASSWORD=sun6urn31
     env_file:
       - db.env
 
@@ -20,7 +21,9 @@ services:
     image: nextcloud:fpm-alpine
     restart: always
     volumes:
-      - nextcloud:/var/www/html
+      - ${APP_HOST_MOUNT}:/var/www/html
+      - ${EXT_DATA_HOST_ACCESS}:/srv
+      - /etc/localtime:/etc/localtime:ro
     environment:
       - MYSQL_HOST=db
       - REDIS_HOST=redis
@@ -30,15 +33,33 @@ services:
       - db
       - redis
 
+  collabora:
+    image: collabora/code
+    restart: always
+    expose:
+      - 9980
+    cap_add:
+      - MKNOD
+    environment:
+      - domain=${NC_DOMAIN}
+      - VIRTUAL_HOST=${COLLAB_DOMAIN}
+      - VIRTUAL_NETWORK=proxy-tier
+      - VIRTUAL_PORT=9980
+      - VIRTUAL_PROTO=https
+      - LETSENCRYPT_HOST=${COLLAB_DOMAIN}
+      - LETSENCRYPT_EMAIL=admin@noan.me
+    networks:
+      - proxy-tier
+
   web:
     build: ./web
     restart: always
     volumes:
-      - nextcloud:/var/www/html:ro
+      - ${APP_HOST_MOUNT}:/var/www/html:ro
     environment:
-      - VIRTUAL_HOST=
-      - LETSENCRYPT_HOST=
-      - LETSENCRYPT_EMAIL=
+      - VIRTUAL_HOST=${NC_DOMAIN}
+      - LETSENCRYPT_HOST=${NC_DOMAIN}
+      - LETSENCRYPT_EMAIL=admin@noan.me
     depends_on:
       - app
     networks:
@@ -49,47 +70,13 @@ services:
     image: nextcloud:fpm-alpine
     restart: always
     volumes:
-      - nextcloud:/var/www/html
+      - ${APP_HOST_MOUNT}:/var/www/html
     entrypoint: /cron.sh
     depends_on:
       - db
       - redis
 
-  proxy:
-    build: ./proxy
-    restart: always
-    ports:
-      - 80:80
-      - 443:443
-    labels:
-      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
-    volumes:
-      - certs:/etc/nginx/certs:ro
-      - vhost.d:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-    networks:
-      - proxy-tier
-
-  letsencrypt-companion:
-    image: jrcs/letsencrypt-nginx-proxy-companion
-    restart: always
-    volumes:
-      - certs:/etc/nginx/certs
-      - vhost.d:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - proxy-tier
-    depends_on:
-      - proxy
-
-volumes:
-  db:
-  nextcloud:
-  certs:
-  vhost.d:
-  html:
-
 networks:
   proxy-tier:
+    external:
+      name: proxy-ssl
