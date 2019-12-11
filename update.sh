@@ -193,7 +193,11 @@ function create_variant() {
 	echo '# DO NOT EDIT: created by update.sh'
 	echo 'name: Build and test images'
 	echo
-	echo 'on: [push, pull_request]'
+	echo 'on:'
+	echo '  push:'
+	echo '    branches:'
+	echo '      - master'
+	echo '  pull_request:'
 	echo
 	echo 'jobs:'
 } > .github/workflows/images.yml
