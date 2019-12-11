@@ -154,9 +154,49 @@ function create_variant() {
 	fi
 
 	for arch in i386 amd64; do
+		# https://github.com/docker-library/php/issues/822
+		if [[ "$arch" == 'i386' && "$variant" == 'apache' ]]; then
+			continue
+		fi
+
 		travisEnv='    - env: VERSION='"$1"' VARIANT='"$variant"' ARCH='"$arch"'\n'"$travisEnv"
+
+		image="$arch/nextcloud:$1-$variant"
+
+		{
+			echo
+			echo "  $arch-$variant-${version/./-}:"
+			echo "    name: $image"
+			echo "    runs-on: ubuntu-latest"
+			echo "    steps:"
+			echo "      - name: Checkout repo"
+			echo "        uses: actions/checkout@v1"
+			if [[ "$arch" == 'i386' ]]; then
+				echo "      - name: Use i386 base image"
+				echo "        run: sed -i -e 's/FROM php/FROM i386\/php/g' '$dir/Dockerfile'"
+			fi
+			echo "      - name: Build the image"
+			echo "        run: docker build -t '$image' '$dir'"
+			echo "      - name: Tag image"
+			echo "        run: docker tag '$image' 'nextcloud:$variant'"
+			for e in cron full imap smb; do
+				echo "      - name: Build the $e example"
+				echo "        run: docker build -t '$image-$e' '.examples/dockerfiles/$e/$variant'"
+			done
+			echo "      - name: List images"
+			echo "        run: docker images"
+		} >> .github/workflows/images.yml
 	done
 }
+
+{
+	echo '# DO NOT EDIT: created by update.sh'
+	echo 'name: Build and test images'
+	echo
+	echo 'on: [push, pull_request]'
+	echo
+	echo 'jobs:'
+} > .github/workflows/images.yml
 
 find . -maxdepth 1 -type d -regextype sed -regex '\./[[:digit:]]\+\.[[:digit:]]\+\(-rc\|-beta\|-alpha\)\?' -exec rm -r '{}' \;
 
