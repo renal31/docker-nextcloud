@@ -33,18 +33,6 @@ after_script:
   - docker images
 
 jobs:
-  # https://github.com/docker-library/php/issues/822
-  allow_failures:
-    - env: VERSION=15.0 VARIANT=apache ARCH=i386
-    - env: VERSION=16.0 VARIANT=apache ARCH=i386
-    - env: VERSION=17.0 VARIANT=apache ARCH=i386
-    - env: VERSION=18.0 VARIANT=apache ARCH=i386
-    - env: VERSION=15.0-rc VARIANT=apache ARCH=i386
-    - env: VERSION=16.0-rc VARIANT=apache ARCH=i386
-    - env: VERSION=17.0-rc VARIANT=apache ARCH=i386
-    - env: VERSION=18.0-rc VARIANT=apache ARCH=i386
-    - env: VERSION=17.0-beta VARIANT=apache ARCH=i386
-    - env: VERSION=18.0-beta VARIANT=apache ARCH=i386
   include:
     - &test-scripts
       stage: test scripts
@@ -72,22 +60,18 @@ jobs:
     - env: VERSION=18.0-beta VARIANT=fpm ARCH=amd64
     - env: VERSION=18.0-beta VARIANT=fpm ARCH=i386
     - env: VERSION=18.0-beta VARIANT=apache ARCH=amd64
-    - env: VERSION=18.0-beta VARIANT=apache ARCH=i386
     - env: VERSION=15.0 VARIANT=fpm-alpine ARCH=amd64
     - env: VERSION=15.0 VARIANT=fpm-alpine ARCH=i386
     - env: VERSION=15.0 VARIANT=fpm ARCH=amd64
     - env: VERSION=15.0 VARIANT=fpm ARCH=i386
     - env: VERSION=15.0 VARIANT=apache ARCH=amd64
-    - env: VERSION=15.0 VARIANT=apache ARCH=i386
     - env: VERSION=16.0 VARIANT=fpm-alpine ARCH=amd64
     - env: VERSION=16.0 VARIANT=fpm-alpine ARCH=i386
     - env: VERSION=16.0 VARIANT=fpm ARCH=amd64
     - env: VERSION=16.0 VARIANT=fpm ARCH=i386
     - env: VERSION=16.0 VARIANT=apache ARCH=amd64
-    - env: VERSION=16.0 VARIANT=apache ARCH=i386
     - env: VERSION=17.0 VARIANT=fpm-alpine ARCH=amd64
     - env: VERSION=17.0 VARIANT=fpm-alpine ARCH=i386
     - env: VERSION=17.0 VARIANT=fpm ARCH=amd64
     - env: VERSION=17.0 VARIANT=fpm ARCH=i386
     - env: VERSION=17.0 VARIANT=apache ARCH=amd64
-    - env: VERSION=17.0 VARIANT=apache ARCH=i386
