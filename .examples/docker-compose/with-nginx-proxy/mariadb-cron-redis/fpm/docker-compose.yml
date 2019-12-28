@@ -2,6 +2,7 @@ version: '2'
 
 services:
   db:
+    container_name: nextcloud-db
     image: mariadb
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     restart: always
@@ -14,10 +15,12 @@ services:
       - db.env
 
   redis:
+    container_name: nextcloud-redis
     image: redis:alpine
     restart: always
 
   app:
+    container_name: nextcloud-app
     image: nextcloud:fpm-alpine
     restart: always
     volumes:
@@ -52,6 +55,7 @@ services:
       - proxy-tier
 
   web:
+    container_name: nextcloud-web
     build: ./web
     restart: always
     volumes:
@@ -67,6 +71,7 @@ services:
       - default
 
   cron:
+    container_name: nextcloud-cron
     image: nextcloud:fpm-alpine
     restart: always
     volumes:
