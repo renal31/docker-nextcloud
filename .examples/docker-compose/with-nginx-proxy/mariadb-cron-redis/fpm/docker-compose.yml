@@ -36,24 +36,6 @@ services:
       - db
       - redis
 
-  collabora:
-    image: collabora/code
-    restart: always
-    expose:
-      - 9980
-    cap_add:
-      - MKNOD
-    environment:
-      - domain=${NC_DOMAIN}
-      - VIRTUAL_HOST=${COLLAB_DOMAIN}
-      - VIRTUAL_NETWORK=proxy-tier
-      - VIRTUAL_PORT=9980
-      - VIRTUAL_PROTO=https
-      - LETSENCRYPT_HOST=${COLLAB_DOMAIN}
-      - LETSENCRYPT_EMAIL=admin@noan.me
-    networks:
-      - proxy-tier
-
   web:
     container_name: nextcloud-web
     build: ./web
