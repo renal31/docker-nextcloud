@@ -41,23 +41,42 @@ services:
     networks:
       - default
 
-  onlyoffice-document-server:
-    container_name: onlyoffice-document-server
-    image: onlyoffice/documentserver:latest
+#  onlyoffice-document-server:
+#    container_name: onlyoffice-document-server
+#    image: onlyoffice/documentserver:latest
+#    restart: always
+#    expose:
+#      - '80'
+#      - '443'
+#    volumes:
+#      - ${OFFICE_HOST_MOUNT}/data:/var/www/onlyoffice/Data
+#      - ${OFFICE_HOST_MOUNT}/log:/var/log/onlyoffice
+#    environment:
+#      - VIRTUAL_HOST=${OFFICE_DOMAIN}
+#      - LETSENCRYPT_HOST=${OFFICE_DOMAIN}
+#      - LETSENCRYPT_EMAIL=admin@noan.me
+#    networks:
+#      - proxy-tier
+#      - default
+
+  collabora:
+    container_name: collabora
+    image: collabora/code
     restart: always
     expose:
-      - '80'
-      - '443'
-    volumes:
-      - ${OFFICE_HOST_MOUNT}/data:/var/www/onlyoffice/Data
-      - ${OFFICE_HOST_MOUNT}/log:/var/log/onlyoffice
+      - 9980
+    cap_add:
+      - MKNOD
     environment:
+      - domain=${NC_DOMAIN}
       - VIRTUAL_HOST=${OFFICE_DOMAIN}
+      - VIRTUAL_NETWORK=proxy-tier
+      - VIRTUAL_PORT=9980
+      - VIRTUAL_PROTO=https
       - LETSENCRYPT_HOST=${OFFICE_DOMAIN}
       - LETSENCRYPT_EMAIL=admin@noan.me
     networks:
       - proxy-tier
-      - default
 
   web:
     container_name: nextcloud-web
